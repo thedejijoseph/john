@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block page-content %}
+<div id="content-nav">
+<a href="/new-post">new post</a> - <a href="/posts">all posts</a>
+</div>
+
+<div class="post">
+	<p class="heading">{{ post.heading }} <br/><a href="/posts/{{ post.id }}/edit" style="font-size: 15px;">edit post</a></p> 
+	<p class="content">{{ post.content }}</p>
+</div>
+{% end %}

@@ -1,0 +1,77 @@
+
+#header{
+	font-size: 20px;
+}
+
+#hero p{
+	font-size: 30px;
+	font-weight: light;
+}
+
+#content-nav{
+	margin: 4px 0px 7px 0px;
+}
+
+a{
+	color: #333;
+	text-decoration: none;
+}
+
+.post{
+	margin-bottom: 6px;
+}
+
+.post .heading{
+	font-size: 20px;
+	background: #ccc;
+	padding: 3px;
+	margin: 0;
+}
+
+.post .content{
+	background: #eee;
+	padding: 3px;
+	margin: 0;
+}
+
+.compose{
+	margin: auto;
+}
+
+.compose #heading{
+	width: 97%;
+	height: 30px;
+	font-size: 15px;
+	margin-bottom: 3px:
+}
+
+.compose #content{
+	width: 97%;
+	height: 100px;
+	font-size: 12px;
+	margin-bottom: 3px;
+}
+
+.compose #post-btn{
+	padding: 2px 4px 2px 4px;
+	font-size: 15px;
+	margin-top: 2px;
+}
+
+.auth{
+	background: ;
+}
+
+.auth .username{
+	width: 70%;
+	height: 20px;
+	font-size: 16px;
+	margin: 3px 15%;
+}
+
+.auth .password{
+	width: 70%;
+	height: 20px;
+	font-size: 16px;
+	margin: 3px 15%;
+}

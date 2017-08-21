@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block page-content %}
+
+<form action="/posts/{{ post.id }}/edit" method="post" class="compose">
+	<input type="text" name="heading" placeholder="post heading" value="{{ post.heading }}" autofocus autocomplete="off" id="heading"/><br/>
+	<textarea name="content" placeholder="add some content" autofocus id="content">{{ post.content }}</textarea><br/>
+	{% module xsrf_form_html() %}
+	<input type="submit" value="edit post" id="post-btn"/>
+</form>
+
+{% end %}
