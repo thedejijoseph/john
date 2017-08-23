@@ -9,7 +9,7 @@
 	{% for post in recent %}
 	<div class="post">
 		<p class="heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></p>
-		<p class="content">{{ post.content[:200] }}</p>
+		<div class="content">{{ post.html[:200] }}</div>
 	</div>
 	{% end %}
 {% else %}

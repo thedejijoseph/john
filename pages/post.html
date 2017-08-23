@@ -6,7 +6,8 @@
 </div>
 
 <div class="post">
-	<p class="heading">{{ post.heading }} <br/><a href="/posts/{{ post.id }}/edit" style="font-size: 15px;">edit post</a></p> 
-	<p class="content">{{ post.content }}</p>
+	<p class="heading">{{ post.heading }}</p> 
+	<div class="content">{{ post.html }}</div>
+	<p class="dt-info" style="font-size:15px;">post by {{ post.author }}, {{ post.date_published }}. <a href="/posts/{{ post.id }}/edit">edit post</a></p>
 </div>
 {% end %}

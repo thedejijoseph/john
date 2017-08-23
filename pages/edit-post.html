@@ -6,7 +6,11 @@
 	<input type="text" name="heading" placeholder="post heading" value="{{ post.heading }}" autofocus autocomplete="off" id="heading"/><br/>
 	<textarea name="content" placeholder="add some content" autofocus id="content">{{ post.content }}</textarea><br/>
 	{% module xsrf_form_html() %}
-	<input type="submit" value="edit post" id="post-btn"/>
+	<input type="submit" value="edit post" class="post-btn"/>
 </form>
+<form action="/posts/{{ post.id }}/edit/delete" method="post">
+	<input type="submit" value="delete" class="post-btn delete" />
+</form>
+
 
 {% end %}

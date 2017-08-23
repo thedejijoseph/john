@@ -2,11 +2,15 @@
 
 {% block page-content %}
 
+{% if error %}
+<p style="color:red; margin-left:3px;">error: {{ error }}</p>
+{% end %}
+
 <form action="/new-post" method="post" class="compose">
 	<input type="text" name="heading" placeholder="post heading" autofocus autocomplete="off" id="heading"/><br/>
-	<textarea name="content" placeholder="add some content" autofocus id="content"></textarea><br/>
+	<textarea name="content" placeholder="add some content" autofocus id="content">{% if redo[0] %}{{ redo[1] }}{% end }%}</textarea><br/>
 	{% module xsrf_form_html() %}
-	<input type="submit" value="make post" id="post-btn"/>
+	<input type="submit" value="make post" class="post-btn"/>
 </form>
 
 {% end %}

@@ -8,6 +8,7 @@ import time
 import secrets
 import hashlib
 import time
+import markdown
 
 # sql database
 import sqlite3 as sql
@@ -20,11 +21,15 @@ token = secrets.token_hex(5)
 
 class User():
 	def __init__(self, user):
-		# 'data' is tuple of database columns
+		# input 'user' is tuple of database columns
 		self.username = user[0]
 		self.password = user[1]
 
 class Post():
+	"""defines the attributes of post,
+	user to simplify access"""
+	
+	# return just the date of a datetime string
 	def post_date(self, date_string):
 		d_date = date_string.split(";")[0]
 		return d_date
@@ -33,6 +38,7 @@ class Post():
 		self.id = post[0]
 		self.heading = post[1]
 		self.content = post[2]
+		self.html = markdown.markdown(post[2])
 		self.author = post[3]
 		self.date_published = self.post_date(post[4])
 
@@ -58,7 +64,7 @@ class BaseHandler(tornado.web.RequestHandler):
 		else:
 			return False
 	
-	def pub_date(self):
+	def now(self):
 		# time.localtime() returns a tuple of the
 		# current time downn ms from years
 		
@@ -67,7 +73,7 @@ class BaseHandler(tornado.web.RequestHandler):
 		
 		Yr, Mo, Dy, Hr, Mn, Sc = raw[:6]
 		
-		return f"{Dy} {months[Mo+1]}, {Yr}; {Hr}:{Mn}:{Sc}"
+		return f"{Dy} {months[Mo-1]}, {Yr}; {Hr}:{Mn}:{Sc}"
 
 class HomePage(BaseHandler):
 	def get(self):
@@ -113,7 +119,7 @@ class LogoutHandler(BaseHandler):
 class SignupHandler(BaseHandler):
 	def get(self):
 		page = dict(
-			hero="make yourself at home"
+			hero="please. welcome"
 			)
 		self.render("signup.html", error=None, page=page)
 	
@@ -167,19 +173,25 @@ class NewPostHandler(BaseHandler):
 		page = dict(
 			hero="make it happen"
 			)
-		self.render("new-post.html", page=page)
+		self.render("new-post.html", error=None, page=page, redo=[False, ""])
 	
 	@tornado.web.authenticated
 	def post(self):
 		heading = self.get_argument("heading")
 		content = self.get_argument("content")
 		author = self.current_user.decode()
-		pub_date = self.pub_date()
+		pub_date = self.now()
 		
-		cu.execute(f"""insert into posts(heading, content, author, date_published) values("{heading}", "{content}", "{author}", "{pub_date}");""")
-		db.commit()
+		if heading != "":
+			cu.execute(f"""insert into posts(heading, content, author, date_published) values("{heading}", "{content}", "{author}", "{pub_date}");""")
+			db.commit()
+		else:
+			page = dict(
+				hero="make it happen"
+			)
+			self.render("new-post.html", error="post heading is empty", page=page, redo=[True, content])
 		
-		self.redirect(f"/posts")
+		self.redirect("/posts")
 
 class EditPostHandler(BaseHandler):
 	@tornado.web.authenticated
@@ -196,12 +208,29 @@ class EditPostHandler(BaseHandler):
 		heading = self.get_argument("heading")
 		content = self.get_argument("content")
 		author = self.current_user
-		pub_date = self.pub_date()
+		pub_date = self.now()
 		
 		cu.execute(f"""update posts set heading="{heading}", content="{content}" where id={post_id};""")
 		db.commit()
 		
 		self.redirect(f"/posts/{post_id}")
+
+class PostDeleteHandler(BaseHandler):
+	def post(self, post_id):
+		cu.execute(f"""delete from posts where id={post_id};""")
+		db.commit()
+		self.redirect("/posts")
+
+class UserPostsHandler(BaseHandler):
+	@tornado.web.authenticated
+	def get(self):
+		page = dict(
+			hero="these are yours"
+			)
+		user=self.current_user.decode()
+		all = cu.execute(f"""select * from posts where author="{user}" order by date_published desc;""").fetchall()
+		all = [Post(post) for post in all]
+		self.render("posts.html", all=all, page=page)
 
 class AboutJohnHandler(BaseHandler):
 	def get(self):
@@ -227,6 +256,8 @@ app = tornado.web.Application(
 		(r"/posts", AllPostsHandler),
 		(r"/new-post", NewPostHandler),
 		(r"/posts/([0-9]+)/edit", EditPostHandler),
+		(r"/posts/([0-9]+)/edit/delete", PostDeleteHandler),
+		(r"/my-posts", UserPostsHandler),
 		(r"/about-john", AboutJohnHandler),
 		(r"/user/(\w+)", ProfileHandler),
 	],
@@ -235,6 +266,7 @@ app = tornado.web.Application(
 	static_path = os.path.join(os.path.dirname(__file__), "assets"),
 	template_path = os.path.join(os.path.dirname(__file__), "pages"),
 	login_url = "/login",
+	autoescape = None,
 )
 
 app.listen(8081)

@@ -8,7 +8,7 @@
 {% for post in all %}
 	<div class="post">
 		<p class="heading"><a href="posts/{{ post.id }}">{{ post.heading }}</a></p>
-		<p class="content">{{ post.content }}</p>
+		<div class="content">{{ post.html[:200] }}</div>
 	</div>
 {% end %}
 
