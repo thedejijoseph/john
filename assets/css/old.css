@@ -1,9 +1,24 @@
+/*
+@font-face{
+	font-family:"Asap";
+	src: url("Asap.ttf");
+}
+*/
+
+@media screen and (min-width: 480px){
+#container{
+	width: 720px;
+	margin: auto;
+}}
+
 body{
-	font-family: serif;
+	font-family: Asap;
 }
 
 #header{
-	font-size: 20px;
+	margin-top: 5px;
+	padding: 9px 4px 9px 4px;
+	font-size: 1.2em;
 }
 
 #hero p{
@@ -27,13 +42,13 @@ a{
 .post .heading{
 	font-size: 20px;
 	background: #ccc;
-	padding: 3px;
+	padding: 7px;
 	margin: 0;
 }
 
 .post .content{
 	background: #eee;
-	padding: 3px;
+	padding: 7px;
 	margin: 0;
 }
 
@@ -92,3 +107,4 @@ a{
 	font-size: 16px;
 	margin: 3px 15%;
 }
+

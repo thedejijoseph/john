@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block page-content %}
-<div id="content-nav">
-<a href="/new-post">new post</a> - <a href="/posts">all posts</a>
-</div>
+<!-- markup to make new, edit and display a journal entry -->
 
-<div class="post">
-	<p class="heading">{{ post.heading }}</p> 
-	<div class="content">{{ post.html }}</div>
-	<p class="dt-info" style="font-size:15px;">post by {{ post.author }}, {{ post.date_published }}. <a href="/posts/{{ post.id }}/edit">edit post</a></p>
-</div>
+{% block page-wrapper %}
+
+	<div class="post">
+		<div class="post-heading">{{ post.heading }}</div>
+		<div class="post-content">{{ post.content }}</div>
+		<div class="footnote"></div>
+	</div>
+
 {% end %}

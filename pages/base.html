@@ -2,33 +2,34 @@
 <html>
 <head>
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<link rel="stylesheet" href="{{ static_url("styles.css") }}"/>
-	<title>John: this is a journal</title>
+	<link rel="stylesheet" href="{{ static_url("css/john.css") }}"/>
 </head>
 
 <body>
 	<div id="container">
+		{% block header %}
 		<div id="header">
 			<div id="nav" style="float:right;">
 				{% if current_user %}
-					<a href="/user/{{ current_user }}">{{ current_user }}</a> - <a href="/logout">log out</a>
+					<a href="/user/{{ current_user }}">{{ current_user }}</a>
 				{% else %}
-					<a href="/login">log in</a>
+					<a href="/signup">sign up</a> - <a href="/login">log in</a>
 				{% end %}
 			</div>
+			
 			<div id="logo">
-				<a href="/about-john" style="display:inline;">John</a>
+				<a href="/">john's journal</a>
 			</div>
 		</div>
-		{% block hero %}
-		<div id="hero"><a href="/">
-			<p>john: {{ page["hero"] }}</p>
-		</a></div>
 		{% end %}
 		
-		<div id="page-content">
-			{% block page-content %}
+		<div id="page-wrapper">
+			{% block page-wrapper %}
 			{% end %}
+		</div>
+		
+		<div id="footer">
+			<p><a href="/about-john">about john</a></p>
 		</div>
 	</div>
 </body>

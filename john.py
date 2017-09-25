@@ -2,6 +2,7 @@
 
 import tornado.web
 import tornado.ioloop
+from tornado import gen
 
 import os
 import time
@@ -9,36 +10,34 @@ import secrets
 import hashlib
 import time
 import markdown
-
-# sql database
 import sqlite3 as sql
+print ("importing dependencies...")
 
+# sql database connection
 db = sql.connect("disk.db")
 cu = db.cursor()
+print ("setting up database...")
 
 # secure token
 token = secrets.token_hex(5)
 
 class User():
 	def __init__(self, user):
-		# input 'user' is tuple of database columns
 		self.username = user[0]
 		self.password = user[1]
 
 class Post():
-	"""defines the attributes of post,
-	user to simplify access"""
-	
 	# return just the date of a datetime string
 	def post_date(self, date_string):
 		d_date = date_string.split(";")[0]
 		return d_date
 	
+	# humanize access to post data
 	def __init__(self, post):
 		self.id = post[0]
 		self.heading = post[1]
 		self.content = post[2]
-		self.html = markdown.markdown(post[2])
+		self.html = markdown.markdown(post[2][:150])
 		self.author = post[3]
 		self.date_published = self.post_date(post[4])
 
@@ -47,11 +46,8 @@ class BaseHandler(tornado.web.RequestHandler):
 		return self.get_secure_cookie("user")
 	
 	def user_exists(self, username):
-		db_query = cu.execute(f"""select username from users where username="{username}";""").fetchone()
-		if db_query:
-			return True
-		else:
-			return False
+		query = cu.execute(f"""select username from users where username="{username}";""").fetchone()
+		return True if query else False
 	
 	def pswd_authenticated(self, entd_pswd, std_pswd):
 		# user exists already
@@ -59,10 +55,7 @@ class BaseHandler(tornado.web.RequestHandler):
 		
 		# bcrypt is to be implemented later on
 		entd_pswd = hashlib.md5(entd_pswd.encode()).hexdigest()
-		if entd_pswd == std_pswd:
-			return True
-		else:
-			return False
+		return True if entd_pswd == std_pswd else False
 	
 	def now(self):
 		# time.localtime() returns a tuple of the
@@ -75,77 +68,112 @@ class BaseHandler(tornado.web.RequestHandler):
 		
 		return f"{Dy} {months[Mo-1]}, {Yr}; {Hr}:{Mn}:{Sc}"
 
+# app handlers
+
+# /signup
+# /login
+# /logout
+# /search
+
+# /new-post (auth)
+# /posts/id
+# /posts
+# /posts/id/edit
+
 class HomePage(BaseHandler):
 	def get(self):
-		# render a list of recent posts
-		
 		recent_posts = cu.execute("""select * from posts order by date_published desc;""").fetchmany(5)
 		recent = [Post(post) for post in recent_posts]
-		page = dict(
-			hero="you're home!"
-			)
+		page = dict()
+		
 		self.render("index.html", recent=recent, page=page)
 
-# authentication
-class LoginHandler(BaseHandler):
+class SignupHandler(BaseHandler):
 	def get(self):
 		page = dict(
-			hero="just login"
-			)
-		self.render("login.html", error=None, page=page)
+			page="signup")
+		self.render("auth.html", page=page, error=None)
 	
 	def post(self):
 		page = dict(
-			hero="just log in"
+			page="signup",)
+		
+		if self.user_exists(self.get_argument("username")):
+			self.render("auth.html", page=page, error=f"{self.get_argument('username')} is taken")
+		else:
+			username = self.get_argument("username")
+			password = hashlib.md5(self.get_argument("password").encode()).hexdigest()
+			cu.execute(f"""insert into users(username, password) values("{username}", "{password}");""")
+		db.commit()
+		self.redirect("/login")
+
+class LoginHandler(BaseHandler):
+	def get(self):
+		page = dict(
+			page="login",
+			)
+		self.render("auth.html", page=page, error=None)
+	
+	def post(self):
+		page = dict(
+			page="login"
 			)
 		user = cu.execute(f"""select * from users where username="{self.get_argument("username")}";""").fetchone()
 		if not user:
-			self.render("login.html", error="user not found", page=page)
+			self.render("auth.html", page=page, error="invalid username or password")
 			return
 		else:
 			user = User(user)
-		
-		if self.pswd_authenticated(self.get_argument("password"), user.password):
-			self.set_secure_cookie("user", self.get_argument("username"))
-			self.redirect("/")
-		else:
-			self.render("login.html", error="username and password don't match", page=page)
+			if self.pswd_authenticated(self.get_argument("password"), user.password):
+				self.set_secure_cookie("user", self.get_argument("username"))
+				self.redirect("/")
+			else:
+				self.render("auth.html", page=page, error="invalid username or password")
 
 class LogoutHandler(BaseHandler):
 	def get(self):
 		self.clear_cookie("user")
 		self.redirect("/")
 
-class SignupHandler(BaseHandler):
+class SearchHandler(BaseHandler):
 	def get(self):
 		page = dict(
-			hero="please. welcome"
-			)
-		self.render("signup.html", error=None, page=page)
+			hero="the search"
+		)
+		self.render("search.html", page=page)
 	
 	def post(self):
+		self.render("search.html", page=page)
+
+class NewPostHandler(BaseHandler):
+	@tornado.web.authenticated
+	def get(self):
 		page = dict(
-			hero="make yourself at home"
+			action="/posts/new",)
+		self.render("editor.html", page=page,)
+	
+	@tornado.web.authenticated
+	def post(self):
+		heading = self.get_argument("heading") if self.get_argument("heading") != "" else "heading"
+		content = self.get_argument("content") if self.get_argument("content") != "" else "content"
+		author = self.current_user.decode()
+		pub_date = self.now()
+		
+		page = dict(
+			action="/posts/new",)
+		cu.execute(f"""insert into posts("heading", "content", "author", "pub_date") values("{heading}"
+		self.redirect("/posts")
+
+class AllPostsHandler(BaseHandler):
+	@gen.coroutine
+	def get(self):
+		page = dict(
+			hero="this is all of it"
 			)
-		username = self.get_argument("username")
+		posts = cu.execute("""select * from posts order by date_published desc;""").fetchall()
+		all = [Post(post) for post in posts]
 		
-		if self.user_exists(username):
-			self.render("signup.html", error="user already exists", page=page)
-		else:
-			password = hashlib.md5(self.get_argument("password").encode()).hexdigest()
-			cu.execute(f"""insert into users(username, password) values("{username}", "{password}");""")
-		db.commit()
-		
-		self.redirect("/login")
-
-# app handlers
-# posts.db == id, heading, content, author, date_published
-
-# /posts/id -- single post
-# /posts -- all posts
-# /new-post -- add new post (auth)
-# /posts/id/edit -- edit a post (auth)
-# delete a post!
+		self.render("posts.html", all=all, page=page)
 
 class PostHandler(BaseHandler):
 	def get(self, post_id):
@@ -156,48 +184,17 @@ class PostHandler(BaseHandler):
 		
 		# make a post class to ease access
 		post = Post(post)
-		self.render("post.html", post=post, page=page)
+		edit=False
+		if self.current_user!=None and self.current_user.decode()==post.author: edit=True
+		self.render("post.html", post=post, page=page, edit=edit)
 
-class AllPostsHandler(BaseHandler):
-	def get(self):
-		page = dict(
-			hero="this is all of it"
-			)
-		all = cu.execute("""select * from posts order by date_published desc;""").fetchall()
-		all = [Post(post) for post in all]
-		self.render("posts.html", all=all, page=page)
 
-class NewPostHandler(BaseHandler):
-	@tornado.web.authenticated
-	def get(self):
-		page = dict(
-			hero="make it happen"
-			)
-		self.render("new-post.html", error=None, page=page, redo=[False, ""])
-	
-	@tornado.web.authenticated
-	def post(self):
-		heading = self.get_argument("heading")
-		content = self.get_argument("content")
-		author = self.current_user.decode()
-		pub_date = self.now()
-		
-		if heading != "":
-			cu.execute(f"""insert into posts(heading, content, author, date_published) values("{heading}", "{content}", "{author}", "{pub_date}");""")
-			db.commit()
-		else:
-			page = dict(
-				hero="make it happen"
-			)
-			self.render("new-post.html", error="post heading is empty", page=page, redo=[True, content])
-		
-		self.redirect("/posts")
 
 class EditPostHandler(BaseHandler):
 	@tornado.web.authenticated
 	def get(self, post_id):
 		page = dict(
-			hero="make your adjustments"
+			hero="make your adjustments",
 			)
 		post = cu.execute(f"""select * from posts where id={post_id};""").fetchone()
 		post = Post(post)
@@ -215,7 +212,7 @@ class EditPostHandler(BaseHandler):
 		
 		self.redirect(f"/posts/{post_id}")
 
-class PostDeleteHandler(BaseHandler):
+class DeletePostHandler(BaseHandler):
 	def post(self, post_id):
 		cu.execute(f"""delete from posts where id={post_id};""")
 		db.commit()
@@ -244,19 +241,25 @@ class ProfileHandler(BaseHandler):
 		page = dict(
 			hero=f"this is you, {username}"
 		)
-		self.render("profile.html", page=page)
+		users = cu.execute("""select username from users;""").fetchall()
+		if username in users:
+			self.render("user-profile.html", page=page, error=None)
+			return
+		else:
+			self.render("user-profile.html", page=page, error="user does not exist")
 
+# ========================== #
 app = tornado.web.Application(
 	[
 		(r"/", HomePage),
+		(r"/signup", SignupHandler),
 		(r"/login", LoginHandler),
 		(r"/logout", LogoutHandler),
-		(r"/signup", SignupHandler),
-		(r"/posts/([0-9]+)", PostHandler),
-		(r"/posts", AllPostsHandler),
 		(r"/new-post", NewPostHandler),
+		(r"/posts", AllPostsHandler),
+		(r"/posts/([0-9]+)", PostHandler),
 		(r"/posts/([0-9]+)/edit", EditPostHandler),
-		(r"/posts/([0-9]+)/edit/delete", PostDeleteHandler),
+		(r"/posts/([0-9]+)/edit/delete", DeletePostHandler),
 		(r"/my-posts", UserPostsHandler),
 		(r"/about-john", AboutJohnHandler),
 		(r"/user/(\w+)", ProfileHandler),
@@ -269,6 +272,11 @@ app = tornado.web.Application(
 	autoescape = None,
 )
 
-app.listen(8081)
-tornado.ioloop.IOLoop.current().start()
+try:
+	print ("starting application...")
+	app.listen(8081)
+	tornado.ioloop.IOLoop.current().start()
+except:
+	print ("\nshutting down!")
+	import sys; sys.exit()
 	
