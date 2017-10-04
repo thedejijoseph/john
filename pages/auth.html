@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block header %}
+		<div id="header">
+			<div id="nav" style="float:right;">
+				{% if page["page"] == "signup" %}
+					<a href="/login">log in</a>
+				{% elif page["page"] == "login" %}
+					<a href="/signup">sign up</a>
+				{% end %}
+			</div>
+			<div id="logo">
+				<a href="/">john's journal</a>
+			</div>
+		</div>
+{% end %}
+
+{% block page-wrapper %}
+	{% if page["page"] == "signup" %}
+		<div class="auth-form">
+			{% if error %}<p style="position: center; color: red;">{{ error }}</p>{% end %}
+			<form action="/signup" method="post">
+				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/>
+				<input type="password" name="password" placeholder="password" class="password text-input"/>
+				{% module xsrf_form_html() %}
+				<input type="submit" value="sign up" class="submit-button"/>
+			</form>
+		</div>
+	{% elif page["page"] == "login" %}
+		<div class="auth-form">
+			{% if error %}<p style="position: center; color: red;">{{ error }}</p>{% end %}
+			<form action="/login" method="post">
+				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/>
+				<input type="password" name="password" placeholder="password" class="password text-input"/>
+				{% module xsrf_form_html() %}
+				<input type="submit" value="login" class="submit-button"/>
+			</form>
+		</div>
+	{% end %}
+
+{% end %}

@@ -1,0 +1,123 @@
+
+#header{
+	background: #fff;
+	padding: 10px;
+	border: 1px solid #005;
+	font-size: 17px;
+}
+#header a{
+	color: #000;
+	text-decoration: none;
+}
+
+#page-wrapper{
+	margin: 10px;
+}
+
+a{
+	color: #000;
+	text-decoration: none;
+}
+
+/* for the index page alone */
+.i-post{
+	display: inline-block;
+	border: 1px solid black;
+	//border: none;
+	padding: 6px;
+	margin: 3px 0px;
+	font-size: 15px;
+}
+
+.i-post-heading a{
+	color: #999;
+	text-decoration: none;
+}
+
+.i-post-heading{
+	font-size: 18px;
+	color: #999;
+}
+/* index done */
+
+/* and for the rest of us */
+.post{
+	display: inline-block;
+	//border: 1px solid black;
+	border: none;
+	padding: 6px;
+	margin: 3px 0px;
+}
+
+.post-heading a{
+	color: #999;
+	text-decoration: none;
+}
+
+.post-heading{
+	font-size: 20px;
+	color: #999;
+}
+
+.footnote .edit{
+	float: right;
+}
+
+.footnote a{
+	color: #000;
+	text-decoration: none;
+}
+/* and thats it again */
+
+.auth-form{
+	margin: 15px;
+}
+
+.auth-form .text-input{
+	display: inline-block;
+	height: 45px;
+	border: none;
+	border-bottom: 1px solid black;
+	font-size: 17px;
+	padding: 4px 8px 4px 8px;
+	margin: 4px auto;
+}
+
+.auth-form .submit-button{
+	display: inline-block;
+	padding: 4px 20px;
+	font-size: 15px;
+	margin: 6px 0px;
+}
+
+.editor{
+	margin-top: 20px;
+}
+
+.editor .heading{
+	display: inline-block;
+	border: none;
+	border-bottom: 1px solid #000;
+	width: 90%;
+	font-size: 18px;
+	color: #999;
+	margin: 4px 0px;
+}
+
+.editor .content{
+	display: inline-block;
+	border: none;
+	border: 1px solid #000;
+	width: 90%;
+	height: 250px;
+	font-size: 13px;
+	padding: 4px 3px 4px 6px;
+	margin-top: 7px;
+}
+
+.editor .save-button{
+	display: inline-block;
+	padding: 3px 25px;
+	font-size: 15px;
+	margin: 6px 0px;
+}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block page-wrapper %}
+
+<script>
+	function DeletePost(){
+		let del = confirm("move this post to trash?")
+		if (del){
+			alert("you said so")
+			}
+		}
+</script>
+
+	<div class="editor">
+		<form action="{{ page["action"] }}" method="post">
+			<input type="text" name="heading" placeholder="heading" value="{{ post.heading if post else "" }}" autocomplete="off" class="heading"/>
+			<textarea name="content" placeholder="markdown supported" class="content">{{ post.content if post else "" }}</textarea>
+			{% module xsrf_form_html() %}
+			<input type="submit" value="save" class="save-button"/>
+		</form>
+	</div>
+{% end %}

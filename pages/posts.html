@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 
-{% block page-content %}
-<div id="content-nav">
-<a href="new-post">new post</a>
-</div>
-
+{% block page-wrapper %}
+<h3 style="display: inline-block">all posts</h3> - <a href="/posts/new">new post</a>
 {% for post in all %}
-	<div class="post">
-		<p class="heading"><a href="posts/{{ post.id }}">{{ post.heading }}</a></p>
-		<div class="content">{{ post.html }}</div>
+	<div class="i-post">
+		<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
+		<div class="i-post-content">{{ post.brief }}</div>
+		<div class="i-footnote"></div>
 	</div>
 {% end %}
 
