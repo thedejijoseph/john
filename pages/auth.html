@@ -20,7 +20,7 @@
 		<div class="auth-form">
 			{% if error %}<p style="position: center; color: red;">{{ error }}</p>{% end %}
 			<form action="/signup" method="post">
-				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/>
+				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/><br/>
 				<input type="password" name="password" placeholder="password" class="password text-input"/>
 				{% module xsrf_form_html() %}
 				<input type="submit" value="sign up" class="submit-button"/>
@@ -30,7 +30,7 @@
 		<div class="auth-form">
 			{% if error %}<p style="position: center; color: red;">{{ error }}</p>{% end %}
 			<form action="/login" method="post">
-				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/>
+				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/><br/>
 				<input type="password" name="password" placeholder="password" class="password text-input"/>
 				{% module xsrf_form_html() %}
 				<input type="submit" value="login" class="submit-button"/>

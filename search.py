@@ -1,33 +1,104 @@
-# how does search work?
+import os
+from operator import attrgetter
+import sqlite3 as sql
+import logging
 
+# logging config
+logging.basicConfig(
+	level=logging.DEBUG,
+	format="%(asctime)s | %(levelname)s | %(message)s"
+)
+
+# database connection
+db = sql.connect("disk.db")
+cu = db.cursor()
+
+# === setup === #
 class Post():
 	def __init__(self, post):
 		self.id = post[0]
 		self.heading = post[1]
 		self.content = post[2]
+		self.author = post[3]
+		self.date_published = post[4]
+	
+	def __repr__(self):
+		return f"post {self.id}; {self.heading[:15]}..."
 
-words = {}
-index = {}
+class Hit(Post):
+	def __init__(self, post):
+		super().__init__(post)
+		
+		self.score = 0
 
-posts = [
-	[1, "hello world", "i am populary reffered to as codde and im here to assert the argument that the world and not the earth is round"],
-	[2, "lies", "thats what we scream. you hear that donald skunk! youre a liar"],
-	[3, "security", "ive just been employed at my choice company as a security engineer, although its more of a pen testing job. which im in love with as much as heck"],
-]
+corpus = {}
 
-# the question: construct a scalable search engine to query posts
-# the solution: crawl and index; process queries; provide relevant results
-
-# check this out: a search for "donald j. trump" returns "post 2" cause of a reference to "donald skunk!"
-
-# use an inverted index to quickly locate the documents containing the words in a query and then rank these documents by relevance
-
-# basic (naively inefficient) search
-def basic(query):
-	for post in posts:
+def update_index(post):
+	try:
 		post = Post(post)
-		if query in post.heading or query in post.content:
-			print(f"post {post.id} has {query} in it.\n\tpost heading: {post.heading}\n\tpost content: {post.content}")
-		else:
-			print(f"{query} was not found in post {post.id}")
+	except:
+		logging.warning(f"couldn't parse object:\n\t {post}")
+		return
+	
+	body = post.heading + '\n' + post.content
+	token = [normalize(value) for value in body.split()]
+	
+	for value in token:
+		entry = corpus.get(value, [])
+		entry.append(post.id)
+		corpus[value] = list(set(entry))
 
+def search(query):
+	token = [normalize(value) for value in query.split()]
+	
+	pool = []
+	for value in token:
+		hits = corpus.get(value, [])
+		pool.extend(hits)
+	pool = list(set(pool))
+	
+	results = rank(pool, query)
+	
+	return results
+
+def rank(pool, query):
+	hits = []
+	for post_id in pool:
+		post = cu.execute(f"select * from posts where id={post_id};").fetchone()
+		hits.append(Hit(post))
+	
+	for hit in hits:
+		body = hit.heading + "\n" + hit.content
+		if body.find(query) is not -1:
+			hit.score += 3
+		
+		args = [normalize(arg) for arg in query.split()]
+		for arg in args:
+			hit.score += arg_freq(arg, body)
+	
+	hits = sorted(hits, key=attrgetter('score'), reverse=True)
+	
+	return [hit.id for hit in hits]
+
+def arg_freq(arg, body):
+	body = [normalize(word) for word in body.split()]
+	
+	return body.count(arg)
+
+def normalize(value):
+	# to lower case
+	value = value.lower()
+	# strip leading and trailing spaces
+	value = value.strip()
+	# strip leading and trailing punctuations
+	value = value.strip(".")
+	value = value.strip(",")
+	value = value.strip("'")
+	
+	return value
+
+
+posts = cu.execute("select * from posts;").fetchall()
+for post in posts:
+	update_index(post)
+logging.info("corpus is up to date")

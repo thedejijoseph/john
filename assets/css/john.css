@@ -49,6 +49,10 @@ a{
 	margin: 3px 0px;
 }
 
+.post a{
+	color: #999;
+}
+
 .post-heading a{
 	color: #999;
 	text-decoration: none;
@@ -61,6 +65,7 @@ a{
 
 .footnote .edit{
 	float: right;
+	color: blue;
 }
 
 .footnote a{
@@ -120,4 +125,28 @@ a{
 	padding: 3px 25px;
 	font-size: 15px;
 	margin: 6px 0px;
+}
+
+.disabled{
+	display: none;
+}
+
+.enabled{
+	display: block;
+}
+
+#search-box{
+	padding: 5px;
+}
+
+#search-box #query-box{
+	padding: 5px;
+	font-size: 15px;
+	color: #000;
+	width: 75%;
+}
+
+#search-box #send-btn{
+	font-size: 15px;
+	padding: 3px 7px;
 }

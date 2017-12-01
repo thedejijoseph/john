@@ -18,7 +18,15 @@
 
 {% block page-wrapper %}
 	{% if recent %}
-	<h3 style="display: inline-block">recent posts</h3> - <a href="/posts">all posts</a>
+	<div>
+		<h3 style="display: inline-block">recent posts</h3> - <a href="/posts">all posts</a> - <span id="search-button" onclick="searchBox()">search</span>
+		<div id="search-box" class="disabled">
+			<form action="/search" method="POST">
+				<input type="text" name="query" id="query-box" placeholder="what we're you looking for..." required autocomplete=off/>
+				<input type="submit" value="search" id="send-btn"/>
+			</form>
+		</div>
+	</div>
 	{% for post in recent %}
 		<div class="i-post">
 			<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
@@ -27,6 +35,8 @@
 		</div>
 	{% end %}
 	{% else %}
-		<h2>no posts have been made yet. <a href="/posts/new">make one</a></h2>
+	<div style="margin-top: 35%">
+		<h2>no posts here. do make a <a href="/posts/new" style="text-decoration: underline">new</a> one or something.</h2>
+	</div>
 	{% end %}
 {% end %}

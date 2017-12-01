@@ -8,9 +8,12 @@ import os
 import time
 import secrets
 import hashlib
-import time
-import markdown
+import logging
 import sqlite3 as sql
+
+import markdown
+
+import search
 
 # sql database connection
 db = sql.connect("disk.db")
@@ -19,6 +22,16 @@ cu = db.cursor()
 # secure token
 token = secrets.token_hex(5)
 
+# logging config
+logging.basicConfig(
+	level = logging.DEBUG,
+	format = "%(asctime)s | %(levelnamr)s | %(message)s"
+)
+
+logging.info("dependencies imported")
+logging.info("setting up application")
+
+# ==== setup ==== #
 class User():
 	def __init__(self, user):
 		self.id = user[0]
@@ -26,20 +39,32 @@ class User():
 		self.password = user[2]
 
 class Post():
-	# return just the date of a datetime string
-	def post_date(self, date_string):
-		d_date = date_string.split(";")[0]
-		return d_date
-	
-	# humanize access to post data
 	def __init__(self, post):
 		self.id = post[0]
 		self.heading = post[1]
 		self.content = post[2]
 		self.markdown = markdown.markdown(post[2])
-		self.brief = markdown.markdown(post[2][:150])
+		self.brief = self.excerpt()
 		self.author = post[3]
 		self.date_published = self.post_date(post[4])
+	
+	def post_date(self, date_string):
+		# return just the date of a datetime string
+		d_date = date_string.split(";")[0]
+		return d_date
+	
+	def excerpt(self):
+		# post excerpt
+		content = self.content
+		newline = content.find("\n")
+		if newline > 145 and newline < 155:
+		    brief = content[:newline]
+		
+		else:
+			fullstop = content[150:].find(".")
+			brief = content[:fullstop+151]
+		
+		return markdown.markdown(brief)
 
 class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
@@ -50,16 +75,16 @@ class BaseHandler(tornado.web.RequestHandler):
 		return True if query else False
 	
 	def pswd_authenticated(self, entd_pswd, std_pswd):
-		# user exists already
+		# user exists
 		# confirm that entered password hash matches stored password hash
 		
-		# bcrypt is to be implemented later on
+		# bcrypt to be implemented later on
 		entd_pswd = hashlib.md5(entd_pswd.encode()).hexdigest()
 		return True if entd_pswd == std_pswd else False
 	
 	def now(self):
 		# time.localtime() returns a tuple of the
-		# current time downn ms from years
+		# current time down ms from years
 		
 		raw = time.localtime()
 		months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -82,16 +107,11 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class HomePage(BaseHandler):
 	def get(self):
-		recent_posts = cu.execute("""select * from posts order by date_published desc;""").fetchmany(5)
+		recent_posts = cu.execute("""select * from posts order by id desc;""").fetchmany(5)
 		recent = [Post(post) for post in recent_posts]
 		page = dict()
 		
 		self.render("index.html", recent=recent, page=page)
-
-class AboutJohn(BaseHandler):
-	def get(self):
-		page = dict()
-		self.render("about.html", page=page)
 
 class SignupHandler(BaseHandler):
 	def get(self):
@@ -140,6 +160,31 @@ class LogoutHandler(BaseHandler):
 		self.clear_cookie("user")
 		self.redirect("/")
 
+class SearchHandler(BaseHandler):
+	def post(self):
+		query = self.get_argument("query")
+		result = search.search(query)
+		if result:
+			results = []
+			for post_id in result:
+				post = cu.execute(f"""select * from posts where id={post_id};""").fetchone()
+				results.append(Post(post))
+		else:
+			results = None
+		self.render("results.html", results=results, query=query)
+
+class ProfileHandler(BaseHandler):
+	def get(self, username):
+		user = cu.execute(f"""select * from users where username="{username}";""").fetchone()
+		if user:
+			user = User(user)
+			posts = cu.execute(f"""select * from posts where author="{user.username}";""").fetchall()
+			posts = [Post(post) for post in posts]
+			self.render("user.html", user=user, posts=posts, error=None)
+			return
+		else:
+			self.render("user.html", user=None, posts=None, error="user was not found")
+
 class AllPostsHandler(BaseHandler):
 	@gen.coroutine
 	def get(self):
@@ -170,6 +215,10 @@ class NewPostHandler(BaseHandler):
 		
 		cu.execute(f"""insert into posts("heading", "content", "author", "date_published") values("{heading}", "{content}", "{author}", "{pub_date}");""")
 		db.commit()
+		
+		# update index
+		just_in = cu.execute(f"""select * from posts where id = {cu.lastrowid};""").fetchone()
+		search.update_index(just_in)
 		
 		self.redirect("/posts")
 
@@ -207,6 +256,10 @@ class EditPostHandler(BaseHandler):
 		cu.execute(f"""update posts set heading="{heading}", content="{content}" where id={post_id};""")
 		db.commit()
 		
+		# update index
+		just_in = cu.execute(f"""select * from posts where id = {cu.lastrowid};""").fetchone()
+		search.update_index(just_in)
+		
 		self.redirect(f"/posts/{post_id}")
 
 class DeletePostHandler(BaseHandler):
@@ -215,33 +268,22 @@ class DeletePostHandler(BaseHandler):
 		db.commit()
 		self.redirect("/posts")
 
-class ProfileHandler(BaseHandler):
-	def get(self, username):
-		user = cu.execute(f"""select * from users where username="{username}";""").fetchone()
-		if user:
-			user = User(user)
-			posts = cu.execute(f"""select * from posts where author="{user.username}";""").fetchall()
-			posts = [Post(post) for post in posts]
-			self.render("user.html", user=user, posts=posts, error=None)
-			return
-		else:
-			self.render("user.html", user=None, posts=None, error="this user does not exist")
-
 # ========================== #
-app = tornado.web.Application(
-	[
+handlers = [
 		(r"/", HomePage),
-		(r"/about", AboutJohn),
 		(r"/signup", SignupHandler),
 		(r"/login", LoginHandler),
 		(r"/logout", LogoutHandler),
+		(r"/search", SearchHandler),
+		(r"/user/(.*)", ProfileHandler),
 		(r"/posts", AllPostsHandler),
 		(r"/posts/new", NewPostHandler),
 		(r"/posts/([0-9]+)", PostHandler),
 		(r"/posts/([0-9]+)/edit", EditPostHandler),
 		(r"/posts/([0-9]+)/edit/delete", DeletePostHandler),
-		(r"/user/(.*)", ProfileHandler),
-	],
+]
+
+settings = dict(
 	debug = True,
 	cookie_secret = token,
 	static_path = os.path.join(os.path.dirname(__file__), "assets"),
@@ -250,10 +292,17 @@ app = tornado.web.Application(
 	autoescape = None,
 )
 
+app = tornado.web.Application(
+	handlers = handlers,
+	**settings,
+)
+
+logging.info("server is starting")
 try:
 	app.listen(8081)
 	tornado.ioloop.IOLoop.current().start()
 except:
-	print ("\nshutting down!")
-	import sys; sys.exit()
-	
+	logging.warning("something just went off")
+	logging.critical("shutting down!")
+	import sys
+	sys.exit()

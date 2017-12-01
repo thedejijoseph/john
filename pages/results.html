@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block page-wrapper %}
+
+<div id="search-box" class="enabled">
+	<form action="/search" method="POST">
+		<input type="text" name="query" id="query-box" placeholder="something else.." required autocomplete=off/>
+		<input type="submit" value="search" id="send-btn"/>
+	</form>
+</div>
+
+<h3>search for: {{ query }}</h3>
+{% if results %}
+	{% for post in results %}
+		<div class="i-post">
+			<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
+			<div class="i-post-content">{{ post.brief }}</div>
+			<div class="i-footnote"></div>
+		</div>
+	{% end %}
+{% else %}
+	<h3>we couldn't find anything of such where we looked. sorry.</h3>
+{% end %}
+
+{% end %}
