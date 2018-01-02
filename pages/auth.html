@@ -32,6 +32,7 @@
 			<form action="/login" method="post">
 				<input type="text" name="username" placeholder="username" autocomplete="off" class="username text-input"/><br/>
 				<input type="password" name="password" placeholder="password" class="password text-input"/>
+				<input type="hidden" name="next" value="{{ next }}"/>
 				{% module xsrf_form_html() %}
 				<input type="submit" value="login" class="submit-button"/>
 			</form>

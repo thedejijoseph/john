@@ -137,13 +137,22 @@ class LoginHandler(BaseHandler):
 		page = dict(
 			page="login",
 			)
-		self.render("auth.html", page=page, error=None)
+		try:
+			# redirect to
+			rdr_to = self.request.headers["Referer"]
+		except:
+			rdr_to = "/"
+		
+		self.render("auth.html", page=page, error=None, next=rdr_to)
 	
 	def post(self):
 		page = dict(
 			page="login"
 			)
-		user = cu.execute(f"""select * from users where username="{self.get_argument("username")}";""").fetchone()
+		user = cu.execute(f"""
+			select * from users where 
+			username="{self.get_argument("username")}";""").fetchone()
+		
 		if not user:
 			self.render("auth.html", page=page, error="invalid username or password")
 			return
@@ -151,7 +160,9 @@ class LoginHandler(BaseHandler):
 			user = User(user)
 			if self.pswd_authenticated(self.get_argument("password"), user.password):
 				self.set_secure_cookie("user", self.get_argument("username"))
-				self.redirect("/")
+				
+				rdr_to = self.get_argument("next")
+				self.redirect(rdr_to)
 			else:
 				self.render("auth.html", page=page, error="invalid username or password")
 
@@ -297,7 +308,7 @@ app = tornado.web.Application(
 	**settings,
 )
 
-logging.info("server is starting")
+logging.info("server up at localhost: 8081")
 try:
 	app.listen(8081)
 	tornado.ioloop.IOLoop.current().start()

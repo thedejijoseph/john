@@ -20,6 +20,7 @@
 {% block page-wrapper %}
 
 <div id="posts">
+	{% if user %}
 	<h3>{{ _("my posts") if current_user.decode() == user.username else _("user's post") }}</h3>
 	{% if posts %}
 		{% for post in posts %}
@@ -31,6 +32,9 @@
 		{% end %}
 	{% else %}
 		<em>no posts yet</em>
+	{% end %}
+	{% else %}
+	<h2>user does not exist</h2>
 	{% end %}
 </div>
 
