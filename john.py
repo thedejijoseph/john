@@ -108,7 +108,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class HomePage(BaseHandler):
 	def get(self):
 		recent_posts = cu.execute("""select * from posts order by id desc;""").fetchmany(5)
-		print([Post(post).heading for post in recent_posts])
+		
 		recent = [Post(post) for post in recent_posts]
 		page = dict()
 		
