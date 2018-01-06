@@ -108,6 +108,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class HomePage(BaseHandler):
 	def get(self):
 		recent_posts = cu.execute("""select * from posts order by id desc;""").fetchmany(5)
+		print([Post(post).heading for post in recent_posts])
 		recent = [Post(post) for post in recent_posts]
 		page = dict()
 		
@@ -202,7 +203,7 @@ class AllPostsHandler(BaseHandler):
 		page = dict(
 			hero="this is all of it"
 			)
-		posts = cu.execute("""select * from posts order by date_published desc;""").fetchall()
+		posts = cu.execute("""select * from posts order by id desc;""").fetchall()
 		all = [Post(post) for post in posts]
 		
 		self.render("posts.html", all=all, page=page)
