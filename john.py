@@ -280,6 +280,20 @@ class DeletePostHandler(BaseHandler):
 		db.commit()
 		self.redirect("/posts")
 
+class BlobHandler(BaseHandler):
+	def get(self):
+		self.render("blob.html")
+	
+	def delete(self):
+		self.write("DELETE REQUEST")
+	
+	def post(self):
+		self.write("POST REQUEST")
+	
+	def put(self):
+		name = self.get_argument("name")
+		self.write("PUT REQUEST")
+
 # ========================== #
 handlers = [
 		(r"/", HomePage),
@@ -293,6 +307,7 @@ handlers = [
 		(r"/posts/([0-9]+)", PostHandler),
 		(r"/posts/([0-9]+)/edit", EditPostHandler),
 		(r"/posts/([0-9]+)/edit/delete", DeletePostHandler),
+		(r"/blob", BlobHandler),
 ]
 
 settings = dict(
