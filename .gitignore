@@ -1,2 +1,7 @@
 __pycache__/
 disk.db
+
+# ignore stash
+# used to hold files in temp
+stash/
+

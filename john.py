@@ -324,9 +324,9 @@ app = tornado.web.Application(
 	**settings,
 )
 
-logging.info("server up at localhost: 8081")
+logging.info("server up at localhost: 3301")
 try:
-	app.listen(8081)
+	app.listen(3301)
 	tornado.ioloop.IOLoop.current().start()
 except:
 	logging.warning("something just went off")
