@@ -10,7 +10,7 @@ logging.basicConfig(
 )
 
 curdir = os.path.abspath(os.path.dirname(__file__))
-
+print(curdir)
 # database connection
 db = sql.connect(curdir + "/disk.db")
 cu = db.cursor()
