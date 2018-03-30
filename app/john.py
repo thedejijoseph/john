@@ -15,6 +15,10 @@ import markdown
 
 import search
 
+from tornado.options import define
+define("port", default=3301)
+port_no = tornado.options.options.port
+
 # sql database connection
 curdir = os.path.abspath(os.path.dirname(__file__))
 db = sql.connect(curdir + "/disk.db")
@@ -330,8 +334,8 @@ app = tornado.web.Application(
 # to be new forever. + on +
 
 def start():
-	logging.info("server up at localhost: 3301")
-	app.listen(3301)
+	logging.info(f"server up at localhost: {port_no}")
+	app.listen(port_no)
 	tornado.ioloop.IOLoop.current().start()
 
 try:
