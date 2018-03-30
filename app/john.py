@@ -336,7 +336,7 @@ def start():
 
 try:
 	start()
-except:
+except KeyboardInterrupt:
 	logging.warning("something just went off")
 	logging.critical("shutting down!")
 	import sys
