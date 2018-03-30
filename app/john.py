@@ -16,7 +16,8 @@ import markdown
 import search
 
 # sql database connection
-db = sql.connect("disk.db")
+curdir = os.path.abspath(os.path.dirname(__file__))
+db = sql.connect(curdir + "/disk.db")
 cu = db.cursor()
 
 # secure token
@@ -324,10 +325,17 @@ app = tornado.web.Application(
 	**settings,
 )
 
-logging.info("server up at localhost: 3301")
-try:
+# it would seem that john represents a now deprecated way
+# of doing things. and just mentioning, the new isnt going
+# to be new forever. + on +
+
+def start():
+	logging.info("server up at localhost: 3301")
 	app.listen(3301)
 	tornado.ioloop.IOLoop.current().start()
+
+try:
+	start()
 except:
 	logging.warning("something just went off")
 	logging.critical("shutting down!")

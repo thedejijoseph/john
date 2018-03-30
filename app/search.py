@@ -9,8 +9,10 @@ logging.basicConfig(
 	format="%(asctime)s | %(levelname)s | %(message)s"
 )
 
+curdir = os.path.abspath(os.path.dirname(__file__))
+
 # database connection
-db = sql.connect("disk.db")
+db = sql.connect(curdir + "/disk.db")
 cu = db.cursor()
 
 # === setup === #
