@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+
+{% block header %}
+	<div id="header">
+		<div id="nav" style="float:right;">
+			{% if current_user %}
+				<a href="/posts/new">new post</a> - <a href="/logout">log out</a>
+			{% else %}
+				<a href="/signup">sign up</a> - <a href="/login">log in</a>
+			{% end %}
+		</div>
+		
+		<div id="logo">
+			<a href="/">john's journal</a>
+		</div>
+	</div>
+{% end %}
+
+{% block page-wrapper %}
+
+<div id="posts">
+	{% if user %}
+	<h3>{{ _("my posts") if current_user.decode() == user.username else _("user's post") }}</h3>
+	{% if posts %}
+		{% for post in posts %}
+			<div class="i-post">
+				<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
+				<div class="i-post-content">{{ post.brief }}</div>
+				<div class="i-footnote"></div>
+			</div>
+		{% end %}
+	{% else %}
+		<em>no posts yet</em>
+	{% end %}
+	{% else %}
+	<h2>user does not exist</h2>
+	{% end %}
+</div>
+
+{% end %}

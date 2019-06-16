@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block page-wrapper %}
+<h3 style="display: inline-block">all posts</h3> - <a href="/posts/new">new post</a> - <span id="search-button" onclick="searchBox()">search</span>
+		<div id="search-box" class="disabled">
+			<form action="/search" method="POST">
+				<input type="text" name="query" id="query-box" placeholder="what were you looking for..." required autocomplete='off'/>
+				<input type="submit" value="search" id="send-btn"/>
+			</form>
+		</div>
+{% for post in all %}
+	<div class="i-post">
+		<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
+		<div class="i-post-content">{{ post.brief }}</div>
+		<div class="i-footnote"></div>
+	</div>
+{% end %}
+
+{% end %}

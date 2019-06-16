@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header %}
+	<div id="header">
+		<div id="nav" style="float:right;">
+			{% if current_user %}
+				<a href="/posts">all posts</a> - <a href="/user/{{ current_user }}">{{ current_user }}</a>
+			{% else %}
+				<a href="/signup">sign up</a> - <a href="/login">log in</a>
+			{% end %}
+		</div>
+		
+		<div id="logo">
+			<a href="/">john's journal</a>
+		</div>
+	</div>
+{% end %}
+
+{% block page-wrapper %}
+
+	<div class="post">
+		<div class="post-heading"><h3>{{ post.heading }}</h3></div>
+		<div class="post-content">{{ post.markdown }}</div>
+		<hr/>
+		<div class="footnote">
+            <span class="info">{{ post.author.upper() }} | {{ post.date_published }}</span>
+            <a href="/posts/{{post.id}}/edit" class="edit">{%if current_user and current_user.decode() == post.author%}edit{%end%}</a>
+        </div>
+	</div>
+
+{% end %}
