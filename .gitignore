@@ -4,3 +4,4 @@ __pycache__/
 # used to hold files in temp
 stash/
 
+.theia/
