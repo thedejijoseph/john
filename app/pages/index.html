@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 
 {% block header %}
-	<div id="header">
-		<div id="nav" style="float:right;">
-			{% if current_user %}
-				<a href="/posts/new">new post</a> - <a href="/user/{{ current_user }}">{{ current_user }}</a>
-			{% else %}
-				<a href="/signup">sign up</a> - <a href="/login">log in</a>
-			{% end %}
-		</div>
-		
-		<div id="logo">
-			<a href="/">john's journal</a>
-		</div>
-	</div>
+<!-- Page Header -->
+	<header class="masthead">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="site-heading">
+              <h1>John's Journal</h1>
+              <span class="subheading">Recent Posts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 {% end %}
 
-{% block page-wrapper %}
-	{% if recent %}
+{% if recent %}
 	<div>
 		<h3 style="display: inline-block">recent posts</h3> - <a href="/posts">all posts</a> - <span id="search-button" onclick="searchBox()">search</span>
 		<div id="search-box" class="disabled">
@@ -28,15 +28,29 @@
 		</div>
 	</div>
 	{% for post in recent %}
-		<div class="i-post">
-			<div class="i-post-heading"><a href="/posts/{{ post.id }}">{{ post.heading }}</a></div><hr/>
-			<div class="i-post-content">{{ post.brief }}</div>
-			<div class="i-footnote"></div>
-		</div>
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-preview">
+            <a href="/posts/{{ post.id }}">
+              <h2 class="post-title">
+                {{ post.heading }}
+              </h2>
+              <h5 class="post-subtitle">
+                {{ post.brief }}
+              </h5>
+            </a>
+          </div>
+          <hr>
+        </div>
+      </div>
+    </div>
+
 	{% end %}
 	{% else %}
 	<div style="margin-top: 35%">
 		<h2>no posts here. do make a <a href="/posts/new" style="text-decoration: underline">new</a> one or something.</h2>
 	</div>
 	{% end %}
-{% end %}
+
