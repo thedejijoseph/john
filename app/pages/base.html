@@ -1,100 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+<head>
+	<title>John's Journal</title>
+	
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<link rel="stylesheet" href="{{ static_url("css/john.css") }}"/>
+	<script src="{{ static_url("js/jquery-3.2.1.min.js") }}"></script>
+	<script src="{{ static_url("js/john.js") }}"></script>
+</head>
 
-  <head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>John's Journal</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="{{ static_url("bootstrap/css/bootstrap.min.css") }}" rel="stylesheet">
-
-    <!-- Custom fonts for this template -->
-    <link href="{{ static_url("fontawesome-free/css/all.min.css") }}" rel="stylesheet" type="text/css">
-
-    <!-- Custom styles for this template -->
-    <link href="{{ static_url("css/clean-blog.min.css") }}" rel="stylesheet">
-
-  </head>
-
-  <body>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-      <div class="container">
-        <a class="navbar-brand" href="/">John's Journal</a>
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/posts">Stories</a>
-            </li>
-            <li class="nav-item">
-                    <form class="form-inline">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Enter query" aria-label="Search">
-                        <button class="btn btn-outline-secondary my-0 my-sm-0 btn-sm" type="submit">Search</button>
-                    </form>
-                </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    {% block header %}
-    <header class="masthead">
-            <div class="overlay"></div>
-            <div class="container">
-              <div class="row">
-                <div class="col-lg-8 col-md-10 mx-auto">
-                  <div class="page-heading">
-                    <h1>Base Mockup</h1>
-                    <span class="subheading">Foundational construct of all pages</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-    </header>
-
-    {% end %}
-
-          <!-- Main Content -->
-          {% block page-wrapper %}
-		  {% end %}
-
-    <hr>
-
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 col-md-10 mx-auto">
-                {% if current_user %}
+<body>
+	<div id="container">
+		{% block header %}
+		<div id="header">
+			<div id="nav" style="float:right;">
+				{% if current_user %}
 					<a href="/user/{{ current_user }}">{{ current_user }}</a>
 				{% else %}
 					<a href="/signup">sign up</a> - <a href="/login">log in</a>
 				{% end %}
-            <p class="copyright text-muted">Copyright &copy; Canvas Corp.</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-
-    <!-- Bootstrap core JavaScript -->
-    <script src="{{ static_url("js/clean-blog.min.js") }}jquery/jquery.min.js"></script>
-    <script src="{{ static_url("js/clean-blog.min.js") }}bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom scripts for this template -->
-    <script src="{{ static_url("js/clean-blog.min.js") }}"></script>
-
-  </body>
-
+			</div>
+			
+			<div id="logo">
+				<a href="/">john's journal</a>
+			</div>
+		</div>
+		{% end %}
+		
+		<div id="page-wrapper">
+			{% block page-wrapper %}
+			{% end %}
+		</div>
+	</div>
+	
+	<script>
+		function searchBox(){
+			// control the visuals of the search box
+			var box = document.getElementById("search-box");
+			var btn = document.getElementById("search-button");
+			if (box.className == 'disabled'){
+				box.className = "enabled";
+				
+				btn.innerHTML = "";
+				btn.innerHTML = "cancel";
+			}
+			else if (box.className == 'enabled'){
+				box.className = "disabled";
+				
+				btn.innerHTML = "";
+				btn.innerHTML = "search";
+			}
+		}
+	</script>
+</body>
 </html>
